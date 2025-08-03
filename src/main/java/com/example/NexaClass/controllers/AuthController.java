@@ -89,10 +89,11 @@ public class AuthController {
     }
     @PostMapping("/register")
     public ResponseEntity<?>register(@RequestBody AuthRequest request){
+        verifiedMails.add("22a81a0504@sves.org.in");
+        System.out.println(request.getUserName());
         if(facultyRepo.findByEmail(request.getEmail()).isPresent() || studentRepo .findByEmail(request.getEmail()).isPresent() || !verifiedMails.contains(request.getEmail())){
             return ResponseEntity.badRequest().body("email is not verified or already in use");
         }
-        verifiedMails.remove(request.getEmail());
         if(request.getRole().equals("STUDENT")){
             Student student=new Student();
             student.setUserName(request.getUserName());

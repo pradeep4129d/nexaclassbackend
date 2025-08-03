@@ -100,7 +100,7 @@ public class AuthController {
             student.setBranch(request.getBranch());
             student.setEmail(request.getEmail());
             student.setPassword(passwordEncoder.encode(request.getPassword()));
-            student.setSection(request.getSection());
+            student.setSection(request.getSection().toUpperCase());
             student.setSemester(request.getSemester());
             studentRepo.save(student);
         }else{

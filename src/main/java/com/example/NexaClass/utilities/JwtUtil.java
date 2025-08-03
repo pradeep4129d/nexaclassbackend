@@ -18,15 +18,13 @@ public class JwtUtil {
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + 24000 * 60 * 60))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
-
     public String extractUsername(String token) {
         return getClaims(token).getSubject();
     }
-
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
     }

@@ -18,13 +18,4 @@ public class StudentController {
     StudentRepo studentRepo;
     @Autowired
     JwtUtil jwtUtil;
-    @GetMapping("/profile")
-    public ResponseEntity<?>getStudents(Authentication authentication){
-        Optional<Student>student =studentRepo.findByEmail(authentication.getName());
-        if(student.isPresent()){
-            return ResponseEntity.ok(student);
-        }
-        return ResponseEntity.badRequest().body("user not found");
-    }
-
 }

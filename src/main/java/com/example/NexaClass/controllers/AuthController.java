@@ -1,9 +1,6 @@
 package com.example.NexaClass.controllers;
 
-import com.example.NexaClass.DTO.AuthRequest;
-import com.example.NexaClass.DTO.AuthResponse;
-import com.example.NexaClass.DTO.OtpRequest;
-import com.example.NexaClass.DTO.VerifyRequest;
+import com.example.NexaClass.DTO.*;
 import com.example.NexaClass.entities.Faculty;
 import com.example.NexaClass.entities.Student;
 import com.example.NexaClass.repos.FacultyRepo;
@@ -29,10 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -80,6 +74,7 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+        System.out.println(passwordEncoder.encode("faculy123"));
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
@@ -112,5 +107,17 @@ public class AuthController {
         String token = jwtUtil.generateToken(request.getUserName(), request.getRole());
         return ResponseEntity.ok(new AuthResponse(token));
     }
-
+    @PostMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestBody ProfileRequest profileRequest){
+        String name=jwtUtil.extractUsername(profileRequest.getToken());
+        System.out.println(name);
+        Optional<Faculty> faculty =facultyRepo.findByEmail(name);
+        Optional<Student>student=studentRepo.findByEmail(name);
+        if(faculty.isPresent()){
+            return ResponseEntity.ok(faculty);
+        }else if(student.isPresent()){
+            return ResponseEntity.ok(student);
+        }
+        return ResponseEntity.badRequest().body("user not found");
+    }
 }

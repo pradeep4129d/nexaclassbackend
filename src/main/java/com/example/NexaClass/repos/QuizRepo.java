@@ -1,0 +1,10 @@
+package com.example.NexaClass.repos;
+
+import com.example.NexaClass.entities.Quiz;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface QuizRepo extends JpaRepository<Quiz,Integer> {
+    List<Quiz>findByFacultyId(Integer id);
+}

@@ -110,7 +110,6 @@ public class AuthController {
     @PostMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestBody ProfileRequest profileRequest){
         String name=jwtUtil.extractUsername(profileRequest.getToken());
-        System.out.println(name);
         Optional<Faculty> faculty =facultyRepo.findByEmail(name);
         Optional<Student>student=studentRepo.findByEmail(name);
         if(faculty.isPresent()){

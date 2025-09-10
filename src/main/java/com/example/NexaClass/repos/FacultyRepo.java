@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface FacultyRepo extends JpaRepository<Faculty,String> {
+public interface FacultyRepo extends JpaRepository<Faculty,Long> {
     Optional<Faculty>findByUserName(String userName);
     Optional<Faculty>findByEmail(String Email);
 }

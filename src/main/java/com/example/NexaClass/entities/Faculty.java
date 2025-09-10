@@ -21,7 +21,7 @@ public class Faculty {
         this.role = role;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

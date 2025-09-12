@@ -43,4 +43,19 @@ public class FacultyController {
         List<ClassRoom> crs = classRoomRepo.findByFacultyId(classRoom.getFacultyId());
         return ResponseEntity.ok(crs);
     }
+    @DeleteMapping("/classroom/{id}")
+    public ResponseEntity<?>deleteCR(@PathVariable int id,Authentication authentication){
+        System.out.println(id);
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        if(faculty.isPresent()){
+            Optional<ClassRoom>cr=classRoomRepo.findById(id);
+            if(cr.isPresent() && cr.get().getFacultyId()==faculty.get().getId()){
+                classRoomRepo.deleteById(id);
+                List<ClassRoom> crs = classRoomRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
+                return ResponseEntity.ok(crs);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("unauthorized");
+    }
 }

@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClassMemberRepo extends JpaRepository<ClassMember,Integer> {
-    Optional<ClassMember>findByClassRoomId(Integer id);
+    List<ClassMember>findByClassRoomId(Integer id);
 }

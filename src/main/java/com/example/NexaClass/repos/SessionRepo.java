@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SessionRepo extends JpaRepository<Session,Integer> {
-    Optional<Session> findByClassRoomId(Integer id);
+    List<Session> findByClassRoomId(Integer id);
 }

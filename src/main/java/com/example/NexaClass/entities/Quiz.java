@@ -19,14 +19,17 @@ public class Quiz {
     private float marksForCorrect;
     @Column(nullable = false)
     private float negativeMarks;
-
-    public Quiz(int id, int facultyId, String title, String description, float marksForCorrect, float negativeMarks) {
+    @Column(nullable = false)
+    private float passingMarks;
+    public Quiz(){}
+    public Quiz(int id, int facultyId, String title, String description, float marksForCorrect, float negativeMarks,float passingMarks) {
         this.id = id;
         this.facultyId = facultyId;
         this.title = title;
         this.description = description;
         this.marksForCorrect = marksForCorrect;
         this.negativeMarks = negativeMarks;
+        this.passingMarks=passingMarks;
     }
 
     public int getId() {
@@ -75,5 +78,13 @@ public class Quiz {
 
     public void setNegativeMarks(int negativeMarks) {
         this.negativeMarks = negativeMarks;
+    }
+
+    public float getPassingMarks() {
+        return passingMarks;
+    }
+
+    public void setPassingMarks(float passingMarks) {
+        this.passingMarks = passingMarks;
     }
 }

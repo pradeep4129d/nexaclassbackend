@@ -10,7 +10,6 @@ public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     @Column(nullable = false)
     private int facultyId;
     @Column(nullable = false)

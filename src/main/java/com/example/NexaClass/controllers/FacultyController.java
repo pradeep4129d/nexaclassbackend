@@ -4,10 +4,7 @@ import com.example.NexaClass.DTO.AuthRequest;
 import com.example.NexaClass.DTO.AuthResponse;
 import com.example.NexaClass.DTO.ProfileRequest;
 import com.example.NexaClass.entities.*;
-import com.example.NexaClass.repos.ClassMemberRepo;
-import com.example.NexaClass.repos.ClassRoomRepo;
-import com.example.NexaClass.repos.FacultyRepo;
-import com.example.NexaClass.repos.SessionRepo;
+import com.example.NexaClass.repos.*;
 import com.example.NexaClass.utilities.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +28,12 @@ public class FacultyController {
     SessionRepo sessionRepo;
     @Autowired
     ClassMemberRepo classMemberRepo;
+    @Autowired
+    QuizRepo quizRepo;
+    @Autowired
+    QuestionsRepo questionsRepo;
+    @Autowired
+    OptionsRepo optionsRepo;
     @GetMapping("/classroom")
     public ResponseEntity<?>getCR(Authentication authentication) {
         String username = authentication.getName();
@@ -49,7 +52,6 @@ public class FacultyController {
     }
     @DeleteMapping("/classroom/{id}")
     public ResponseEntity<?>deleteCR(@PathVariable int id,Authentication authentication){
-        System.out.println(id);
         String username = authentication.getName();
         Optional<Faculty> faculty =facultyRepo.findByEmail(username);
         if(faculty.isPresent()){
@@ -64,7 +66,6 @@ public class FacultyController {
     }
     @PostMapping("/session")
     public ResponseEntity<?>addSession(@RequestBody Session session){
-        System.out.println(session.getStart());
         sessionRepo.save(session);
         List<Session>sessions=sessionRepo.findByClassRoomId(session.getClassRoomId());
         return ResponseEntity.ok(sessions);
@@ -91,5 +92,46 @@ public class FacultyController {
     public ResponseEntity<?>getCM(@PathVariable int id){
         List<ClassMember>cms=classMemberRepo.findByClassRoomId(id);
         return ResponseEntity.ok(cms);
+    }
+    @PostMapping("/quiz")
+    public ResponseEntity<?>createQuiz(@RequestBody Quiz quiz,Authentication authentication){
+        quizRepo.save(quiz);
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        long id=-1;
+        if(faculty.isPresent()) {
+            id=faculty.get().getId();
+        }
+        List<Quiz>quizzes=quizRepo.findByFacultyId(Integer.parseInt((Long.toString(id))));
+        return ResponseEntity.ok(quizzes);
+    }
+    @GetMapping("/quiz")
+    public ResponseEntity<?>getQuizzed(Authentication authentication){
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        long id=-1;
+        if(faculty.isPresent()) {
+            id=faculty.get().getId();
+        }
+        if(id==-1)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("unAuthorized");
+        List<Quiz>quizzes=quizRepo.findByFacultyId(Integer.parseInt((Long.toString(id))));
+        return ResponseEntity.ok(quizzes);
+    }
+    @DeleteMapping("/quiz/{id}")
+    public ResponseEntity<?>deleteQuiz(@PathVariable int id,Authentication authentication){
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        if(!faculty.isPresent()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("unAuthorized");
+        }
+        quizRepo.deleteById(id);
+        List<Questions>questions=questionsRepo.findByQuizId(id);
+        questionsRepo.deleteByQuizId(id);
+        for(Questions q:questions){
+            optionsRepo.deleteByQuestionId(q.getId());
+        }
+        List<Quiz>quizzes=quizRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
+        return ResponseEntity.ok(quizzes);
     }
 }

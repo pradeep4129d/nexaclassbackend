@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuizRepo extends JpaRepository<Quiz,Integer> {
-    Optional<Quiz> findByFacultyId(Integer id);
+    List<Quiz> findByFacultyId(Integer id);
 }

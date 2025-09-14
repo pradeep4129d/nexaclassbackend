@@ -7,5 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OptionsRepo extends JpaRepository<Options,Integer> {
-    Optional<Options> findByQuestionId(Integer id);
+    List<Options> findByQuestionId(Integer id);
+    void deleteByQuestionId(Integer id);
 }

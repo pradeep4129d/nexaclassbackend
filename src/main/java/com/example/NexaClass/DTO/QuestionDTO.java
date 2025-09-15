@@ -1,35 +1,35 @@
-package com.example.NexaClass.entities;
+package com.example.NexaClass.DTO;
 
-import jakarta.persistence.*;
+import com.example.NexaClass.entities.Options;
 
-@Entity
-@Table(name = "Questions")
-public class Questions {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+import java.util.List;
+
+public class QuestionDTO {
     private int id;
-    @Column
     private int quizId;
-    @Column
     private int taskId;
-    @Column(columnDefinition = "TEXT")
     private String description;
-    @Column
     private String answer;
-    public Questions(){}
-    public Questions(int quizId, int taskId, String description, String answer) {
+    private List<Options>options;
+    public QuestionDTO(){
+
+    }
+
+    public QuestionDTO(int quizId, int taskId, String description, String answer, List<Options> options) {
         this.quizId = quizId;
         this.taskId = taskId;
         this.description = description;
         this.answer = answer;
+        this.options = options;
     }
 
-    public Questions(int id, int quizId, int taskId, String description, String answer) {
+    public QuestionDTO(int id, int quizId, int taskId, String description, String answer, List<Options> options) {
         this.id = id;
         this.quizId = quizId;
         this.taskId = taskId;
         this.description = description;
         this.answer = answer;
+        this.options = options;
     }
 
     public int getId() {
@@ -39,6 +39,7 @@ public class Questions {
     public void setId(int id) {
         this.id = id;
     }
+
     public int getQuizId() {
         return quizId;
     }
@@ -69,5 +70,13 @@ public class Questions {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public List<Options> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Options> options) {
+        this.options = options;
     }
 }

@@ -14,6 +14,7 @@ public class Options {
     @Column(nullable = false,columnDefinition = "TEXT")
     private String description;
 
+    public Options(){}
     public Options(int id, int questionId, String description) {
         this.id = id;
         this.questionId = questionId;

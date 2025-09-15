@@ -27,6 +27,21 @@ public class Activity {
     @Column
     private LocalDateTime end;
 
+    public Activity() {
+    }
+
+    public Activity(int id, int facultyId, int sessionId, String type, int activityId, boolean isTest, boolean includeEditor, LocalDateTime start, LocalDateTime end) {
+        this.id = id;
+        this.facultyId = facultyId;
+        this.sessionId = sessionId;
+        this.type = type;
+        this.activityId = activityId;
+        this.isTest = isTest;
+        this.includeEditor = includeEditor;
+        this.start = start;
+        this.end = end;
+    }
+
     public int getId() {
         return id;
     }

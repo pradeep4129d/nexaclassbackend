@@ -3,15 +3,18 @@ package com.example.NexaClass.controllers;
 import com.example.NexaClass.DTO.AuthRequest;
 import com.example.NexaClass.DTO.AuthResponse;
 import com.example.NexaClass.DTO.ProfileRequest;
+import com.example.NexaClass.DTO.QuestionDTO;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
 import com.example.NexaClass.utilities.JwtUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -133,5 +136,50 @@ public class FacultyController {
         }
         List<Quiz>quizzes=quizRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
         return ResponseEntity.ok(quizzes);
+    }
+    @PostMapping("/question")
+    public ResponseEntity<?>addQuestion(@RequestBody QuestionDTO questionDTO){
+        Questions question=new Questions(questionDTO.getQuizId(), questionDTO.getTaskId(), questionDTO.getDescription(), questionDTO.getAnswer());
+        questionsRepo.save(question);
+        if(questionDTO.getQuizId()<=-1){
+            List<Questions>q=questionsRepo.findByTaskId(questionDTO.getTaskId());
+            return ResponseEntity.ok(q);
+        }
+        Questions recentQuestion=questionsRepo.findTopByOrderByIdDesc();
+        for(Options option: questionDTO.getOptions()){
+            option.setQuestionId(recentQuestion.getId());
+            optionsRepo.save(option);
+        }
+        List<QuestionDTO>res=new ArrayList<>();
+        List<Questions>AllQuestions=questionsRepo.findByQuizId(questionDTO.getQuizId());
+        for(Questions questions:AllQuestions){
+            List<Options>options=optionsRepo.findByQuestionId(questions.getId());
+            res.add(new QuestionDTO(questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
+        }
+        return ResponseEntity.ok(res);
+    }
+    @GetMapping("/question/{id}")
+    public ResponseEntity<?>getQuestion(@PathVariable int id){
+        List<QuestionDTO>res=new ArrayList<>();
+        List<Questions>AllQuestions=questionsRepo.findByQuizId(id);
+        for(Questions questions:AllQuestions){
+            List<Options>options=optionsRepo.findByQuestionId(questions.getId());
+            res.add(new QuestionDTO(questions.getId(), questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
+        }
+        return ResponseEntity.ok(res);
+    }
+    @DeleteMapping("/question/{id}")
+    @Transactional
+    public ResponseEntity<?>deleteQuestion(@PathVariable int id){
+        int quizId=questionsRepo.findById(id).get().getQuizId();
+        questionsRepo.deleteById(id);
+        optionsRepo.deleteByQuestionId(id);
+        List<QuestionDTO>res=new ArrayList<>();
+        List<Questions>AllQuestions=questionsRepo.findByQuizId(quizId);
+        for(Questions questions:AllQuestions){
+            List<Options>options=optionsRepo.findByQuestionId(questions.getId());
+            res.add(new QuestionDTO(questions.getId(),questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
+        }
+        return ResponseEntity.ok(res);
     }
 }

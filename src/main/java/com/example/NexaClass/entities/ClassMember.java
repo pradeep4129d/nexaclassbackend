@@ -14,6 +14,15 @@ public class ClassMember {
     @Column(nullable = false)
     private int classRoomId;
 
+    public ClassMember(int id, int studentId, int classRoomId) {
+        this.id = id;
+        this.studentId = studentId;
+        this.classRoomId = classRoomId;
+    }
+
+    public ClassMember() {
+    }
+
     public int getId() {
         return id;
     }

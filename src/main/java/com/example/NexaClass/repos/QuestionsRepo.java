@@ -11,4 +11,5 @@ public interface QuestionsRepo extends JpaRepository<Questions,Integer> {
     List<Questions>findByTaskId(Integer id);
     void deleteByQuizId(Integer id);
     void deleteByTaskId(Integer id);
+    Questions findTopByOrderByIdDesc();
 }

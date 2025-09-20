@@ -68,7 +68,7 @@ public class Quiz {
         return marksForCorrect;
     }
 
-    public void setMarksForCorrect(int markForCorrect) {
+    public void setMarksForCorrect(float markForCorrect) {
         this.marksForCorrect = markForCorrect;
     }
 
@@ -76,7 +76,7 @@ public class Quiz {
         return negativeMarks;
     }
 
-    public void setNegativeMarks(int negativeMarks) {
+    public void setNegativeMarks(float negativeMarks) {
         this.negativeMarks = negativeMarks;
     }
 

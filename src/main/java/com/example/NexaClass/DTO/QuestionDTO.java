@@ -14,7 +14,6 @@ public class QuestionDTO {
     public QuestionDTO(){
 
     }
-
     public QuestionDTO(int quizId, int taskId, String description, String answer, List<Options> options) {
         this.quizId = quizId;
         this.taskId = taskId;

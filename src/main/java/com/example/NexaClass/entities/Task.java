@@ -18,6 +18,7 @@ public class Task {
     @Column
     private int marks;
 
+    public Task(){}
     public Task(int id, int facultyId, String title, String description, int marks) {
         this.id = id;
         this.facultyId = facultyId;
@@ -25,7 +26,6 @@ public class Task {
         this.description = description;
         this.marks = marks;
     }
-
     public int getFacultyId() {
         return facultyId;
     }

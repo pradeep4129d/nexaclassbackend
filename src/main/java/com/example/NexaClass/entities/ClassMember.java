@@ -13,16 +13,12 @@ public class ClassMember {
     private int studentId;
     @Column(nullable = false)
     private int classRoomId;
-
+    public ClassMember(){};
     public ClassMember(int id, int studentId, int classRoomId) {
         this.id = id;
         this.studentId = studentId;
         this.classRoomId = classRoomId;
     }
-
-    public ClassMember() {
-    }
-
     public int getId() {
         return id;
     }

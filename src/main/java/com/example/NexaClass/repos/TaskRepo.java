@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepo extends JpaRepository<Task,Integer> {
-    Optional<Task> findByFacultyId(Integer id);
+    List<Task> findByFacultyId(Integer id);
 }

@@ -37,6 +37,8 @@ public class FacultyController {
     QuestionsRepo questionsRepo;
     @Autowired
     OptionsRepo optionsRepo;
+    @Autowired
+    TaskRepo taskRepo;
     @GetMapping("/classroom")
     public ResponseEntity<?>getCR(Authentication authentication) {
         String username = authentication.getName();
@@ -172,14 +174,52 @@ public class FacultyController {
     @Transactional
     public ResponseEntity<?>deleteQuestion(@PathVariable int id){
         int quizId=questionsRepo.findById(id).get().getQuizId();
+        int taskId=questionsRepo.findById(id).get().getQuizId();
         questionsRepo.deleteById(id);
         optionsRepo.deleteByQuestionId(id);
-        List<QuestionDTO>res=new ArrayList<>();
-        List<Questions>AllQuestions=questionsRepo.findByQuizId(quizId);
-        for(Questions questions:AllQuestions){
-            List<Options>options=optionsRepo.findByQuestionId(questions.getId());
-            res.add(new QuestionDTO(questions.getId(),questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
+        if (quizId>=0){
+            List<QuestionDTO>res=new ArrayList<>();
+            List<Questions>AllQuestions=questionsRepo.findByQuizId(quizId);
+            for(Questions questions:AllQuestions){
+                List<Options>options=optionsRepo.findByQuestionId(questions.getId());
+                res.add(new QuestionDTO(questions.getId(),questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
+            }
+            return ResponseEntity.ok(res);
         }
-        return ResponseEntity.ok(res);
+        List<Questions>AllQuestions=questionsRepo.findByTaskId(taskId);
+        return ResponseEntity.ok(AllQuestions);
+    }
+    @PutMapping("/quiz")
+    public ResponseEntity<?>updateQuiz(@RequestBody Quiz quiz){
+        Optional<Quiz>q=quizRepo.findById(quiz.getId());
+        if(q.isPresent()){
+            Quiz updatedQuiz=q.get();
+            updatedQuiz.setFacultyId(quiz.getFacultyId());
+            updatedQuiz.setDescription(quiz.getDescription());
+            updatedQuiz.setTitle(quiz.getTitle());
+            updatedQuiz.setMarksForCorrect(quiz.getMarksForCorrect());
+            updatedQuiz.setNegativeMarks(quiz.getNegativeMarks());
+            updatedQuiz.setPassingMarks(quiz.getPassingMarks());
+            quizRepo.save(updatedQuiz);
+            return ResponseEntity.status(HttpStatus.OK).body("updated successfully");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("quiz not found");
+    }
+    @PostMapping("/task")
+    public ResponseEntity<?>createTask(@RequestBody Task task){
+        int facultyId= task.getFacultyId();
+        taskRepo.save(task);
+        List<Task>tasks=taskRepo.findByFacultyId(facultyId);
+        return ResponseEntity.ok(tasks);
+    }
+    @GetMapping("/task")
+    public ResponseEntity<?>getTasks(Authentication authentication){
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        if(faculty.isPresent()){
+            List<Task> tasks = taskRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
+            return ResponseEntity.ok(tasks);
+        }
+        return ResponseEntity.status(402).body("unauthorized");
     }
 }

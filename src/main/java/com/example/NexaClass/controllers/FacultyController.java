@@ -1,8 +1,5 @@
 package com.example.NexaClass.controllers;
 
-import com.example.NexaClass.DTO.AuthRequest;
-import com.example.NexaClass.DTO.AuthResponse;
-import com.example.NexaClass.DTO.ProfileRequest;
 import com.example.NexaClass.DTO.QuestionDTO;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
@@ -162,7 +159,11 @@ public class FacultyController {
     }
     @GetMapping("/question/{id}")
     public ResponseEntity<?>getQuestion(@PathVariable int id){
+        System.out.println(id);
         List<QuestionDTO>res=new ArrayList<>();
+        List<Questions>AllQ=questionsRepo.findByTaskId(id);
+        if(!AllQ.isEmpty())
+            return ResponseEntity.ok(AllQ);
         List<Questions>AllQuestions=questionsRepo.findByQuizId(id);
         for(Questions questions:AllQuestions){
             List<Options>options=optionsRepo.findByQuestionId(questions.getId());
@@ -174,7 +175,7 @@ public class FacultyController {
     @Transactional
     public ResponseEntity<?>deleteQuestion(@PathVariable int id){
         int quizId=questionsRepo.findById(id).get().getQuizId();
-        int taskId=questionsRepo.findById(id).get().getQuizId();
+        int taskId=questionsRepo.findById(id).get().getTaskId();
         questionsRepo.deleteById(id);
         optionsRepo.deleteByQuestionId(id);
         if (quizId>=0){
@@ -205,6 +206,21 @@ public class FacultyController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("quiz not found");
     }
+    @PutMapping("/task")
+    public ResponseEntity<?>updateTask(@RequestBody Task task){
+        Optional<Task>t=taskRepo.findById(task.getId());
+        if(t.isPresent()){
+            Task updatedTask=t.get();
+            updatedTask.setFacultyId(task.getFacultyId());
+            updatedTask.setDescription(task.getDescription());
+            updatedTask.setTitle(task.getTitle());
+            updatedTask.setEval(task.isEval());
+            updatedTask.setMarks(task.getMarks());
+            taskRepo.save(updatedTask);
+            return ResponseEntity.status(HttpStatus.OK).body("updated successfully");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("task not found");
+    }
     @PostMapping("/task")
     public ResponseEntity<?>createTask(@RequestBody Task task){
         int facultyId= task.getFacultyId();
@@ -221,5 +237,17 @@ public class FacultyController {
             return ResponseEntity.ok(tasks);
         }
         return ResponseEntity.status(402).body("unauthorized");
+    }
+    @DeleteMapping("/task/{id}")
+    public ResponseEntity<?>deleteTask(@PathVariable int id,Authentication authentication){
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        if(!faculty.isPresent()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("unAuthorized");
+        }
+        taskRepo.deleteById(id);
+        questionsRepo.deleteByTaskId(id);
+        List<Task>tasks=taskRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
+        return ResponseEntity.ok(tasks);
     }
 }

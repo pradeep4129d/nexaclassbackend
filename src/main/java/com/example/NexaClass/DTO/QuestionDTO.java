@@ -14,6 +14,12 @@ public class QuestionDTO {
     public QuestionDTO(){
 
     }
+    public QuestionDTO(int quizId, int taskId, String description, String answer) {
+        this.quizId = quizId;
+        this.taskId = taskId;
+        this.description = description;
+        this.answer = answer;
+    }
     public QuestionDTO(int quizId, int taskId, String description, String answer, List<Options> options) {
         this.quizId = quizId;
         this.taskId = taskId;

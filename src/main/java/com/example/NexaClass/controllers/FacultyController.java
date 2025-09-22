@@ -36,6 +36,8 @@ public class FacultyController {
     OptionsRepo optionsRepo;
     @Autowired
     TaskRepo taskRepo;
+    @Autowired
+    ActivityRepo activityRepo;
     @GetMapping("/classroom")
     public ResponseEntity<?>getCR(Authentication authentication) {
         String username = authentication.getName();
@@ -249,5 +251,9 @@ public class FacultyController {
         questionsRepo.deleteByTaskId(id);
         List<Task>tasks=taskRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
         return ResponseEntity.ok(tasks);
+    }
+    @GetMapping("/activity/{id}")
+    public ResponseEntity<?>getActivities(@PathVariable int id){
+        return ResponseEntity.ok(activityRepo.findBySessionId(id));
     }
 }

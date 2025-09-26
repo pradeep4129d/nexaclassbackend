@@ -256,4 +256,10 @@ public class FacultyController {
     public ResponseEntity<?>getActivities(@PathVariable int id){
         return ResponseEntity.ok(activityRepo.findBySessionId(id));
     }
+    @PostMapping("/activity")
+    public ResponseEntity<?>createActivity(@RequestBody Activity activity){
+        activityRepo.save(activity);
+        List<Activity>activities=activityRepo.findBySessionId(activity.getSessionId());
+        return ResponseEntity.ok(activities);
+    }
 }

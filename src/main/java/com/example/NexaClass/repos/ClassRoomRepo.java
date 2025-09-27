@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface ClassRoomRepo extends JpaRepository<ClassRoom,Integer> {
     List<ClassRoom> findByFacultyId(Integer id);
+    List<ClassRoom> findByBranchAndSemesterAndSection(String branch, String semester, String section);
 }

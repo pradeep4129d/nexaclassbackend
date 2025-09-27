@@ -122,6 +122,16 @@ public class FacultyController {
         List<Quiz>quizzes=quizRepo.findByFacultyId(Integer.parseInt((Long.toString(id))));
         return ResponseEntity.ok(quizzes);
     }
+    @GetMapping("/quiz/{id}")
+    public ResponseEntity<?>getQuiz(@PathVariable int id){
+        Optional<Quiz>q=quizRepo.findById(id);
+        Optional<Task>t=taskRepo.findById(id);
+        if(q.isPresent()){
+            return ResponseEntity.ok(q.get());
+        }else if(t.isPresent())
+            return ResponseEntity.ok(t.get());
+        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("quiz not found");
+    }
     @DeleteMapping("/quiz/{id}")
     public ResponseEntity<?>deleteQuiz(@PathVariable int id,Authentication authentication){
         String username = authentication.getName();
@@ -262,4 +272,11 @@ public class FacultyController {
         List<Activity>activities=activityRepo.findBySessionId(activity.getSessionId());
         return ResponseEntity.ok(activities);
     }
+    @DeleteMapping("/activity/{id}")
+    public ResponseEntity<?>deleteActivity(@PathVariable int id){
+        int sessionId=activityRepo.findById(id).get().getSessionId();
+        activityRepo.deleteById(id);
+        return ResponseEntity.ok(activityRepo.findBySessionId(sessionId));
+    }
+
 }

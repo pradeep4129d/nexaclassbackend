@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface ActivityRepo extends JpaRepository<Activity,Integer> {
     List<Activity> findByFacultyId(Integer id);
     List<Activity>findBySessionId(Integer id);
-    List<Activity>findByActivityId(Integer id);
+    Optional<Activity>findByActivityId(Integer id);
 }

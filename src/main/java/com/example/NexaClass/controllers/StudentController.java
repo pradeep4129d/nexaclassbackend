@@ -1,5 +1,6 @@
 package com.example.NexaClass.controllers;
 
+import com.example.NexaClass.DTO.ActivityDTO;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
 import com.example.NexaClass.utilities.JwtUtil;
@@ -29,6 +30,10 @@ public class StudentController {
     SessionRepo sessionRepo;
     @Autowired
     ActivityRepo activityRepo;
+    @Autowired
+    QuizRepo quizRepo;
+    @Autowired
+    TaskRepo taskRepo;
     @GetMapping("/classrooms")
     public ResponseEntity<?>getClassRooms(Authentication authentication){
         String username = authentication.getName();
@@ -100,6 +105,20 @@ public class StudentController {
     @GetMapping("/activities/{id}")
     public ResponseEntity<?>getActivities(@PathVariable int id){
         List<Activity>activities=activityRepo.findBySessionId(id);
-        return ResponseEntity.ok(activities);
+        List<ActivityDTO>res=new ArrayList<>();
+        for(Activity activity:activities){
+            Quiz quiz=null;
+            Task task=null;
+            if(activity.getType().equals("quiz")){
+                Optional<Quiz>q=quizRepo.findById(activity.getActivityId());
+                quiz= q.orElse(null);
+            }else{
+                Optional<Task>t=taskRepo.findById(activity.getActivityId());
+                task=t.orElse(null);
+            }
+            ActivityDTO activityDTO=new ActivityDTO(activity.getId(),activity.getFacultyId(), activity.getSessionId(),activity.getType(),activity.getActivityId(),activity.isTest(),activity.isIncludeEditor(),quiz,task);
+            res.add(activityDTO);
+        }
+        return ResponseEntity.ok(res);
     }
 }

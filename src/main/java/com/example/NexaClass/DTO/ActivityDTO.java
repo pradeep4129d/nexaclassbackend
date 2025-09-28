@@ -1,32 +1,20 @@
-package com.example.NexaClass.entities;
+package com.example.NexaClass.DTO;
 
-import jakarta.persistence.*;
+import com.example.NexaClass.entities.Quiz;
+import com.example.NexaClass.entities.Task;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "Activity")
-public class Activity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ActivityDTO {
     private int id;
-    @Column(nullable = false)
     private int facultyId;
-    @Column(nullable = false)
     private int sessionId;
-    @Column
     private String type;
-    @Column(nullable = false)
     private int activityId;
-    @Column
     private boolean test;
-    @Column
     private boolean includeEditor;
+    private Quiz quiz;
+    private Task task;
 
-    public Activity() {
-    }
-
-    public Activity(int id, int facultyId, int sessionId, String type, int activityId, boolean test, boolean includeEditor) {
+    public ActivityDTO(int id, int facultyId, int sessionId, String type, int activityId, boolean test, boolean includeEditor, Quiz quiz, Task task) {
         this.id = id;
         this.facultyId = facultyId;
         this.sessionId = sessionId;
@@ -34,14 +22,8 @@ public class Activity {
         this.activityId = activityId;
         this.test = test;
         this.includeEditor = includeEditor;
-    }
-
-    public boolean isTest() {
-        return test;
-    }
-
-    public void setTest(boolean test) {
-        this.test = test;
+        this.quiz = quiz;
+        this.task = task;
     }
 
     public int getId() {
@@ -84,6 +66,14 @@ public class Activity {
         this.activityId = activityId;
     }
 
+    public boolean isTest() {
+        return test;
+    }
+
+    public void setTest(boolean test) {
+        this.test = test;
+    }
+
     public boolean isIncludeEditor() {
         return includeEditor;
     }
@@ -92,5 +82,19 @@ public class Activity {
         this.includeEditor = includeEditor;
     }
 
+    public Quiz getQuiz() {
+        return quiz;
+    }
 
+    public void setQuiz(Quiz quiz) {
+        this.quiz = quiz;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
 }

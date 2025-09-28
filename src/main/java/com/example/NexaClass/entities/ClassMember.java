@@ -8,10 +8,9 @@ public class ClassMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     @Column(nullable = false)
     private int studentId;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private int classRoomId;
     public ClassMember(){};
     public ClassMember(int id, int studentId, int classRoomId) {

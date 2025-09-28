@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface ClassMemberRepo extends JpaRepository<ClassMember,Integer> {
     List<ClassMember>findByClassRoomId(Integer id);
+    List<ClassMember>findByStudentId(Integer id);
+    void deleteByClassRoomId(Integer id);
 }

@@ -1,6 +1,8 @@
 package com.example.NexaClass.controllers;
 
 import com.example.NexaClass.DTO.ActivityDTO;
+import com.example.NexaClass.DTO.QuizQuestionsDTO;
+import com.example.NexaClass.DTO.TestActivityDTO;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
 import com.example.NexaClass.utilities.JwtUtil;
@@ -34,6 +36,10 @@ public class StudentController {
     QuizRepo quizRepo;
     @Autowired
     TaskRepo taskRepo;
+    @Autowired
+    QuestionsRepo questionsRepo;
+    @Autowired
+    OptionsRepo optionsRepo;
     @GetMapping("/classrooms")
     public ResponseEntity<?>getClassRooms(Authentication authentication){
         String username = authentication.getName();
@@ -120,5 +126,20 @@ public class StudentController {
             res.add(activityDTO);
         }
         return ResponseEntity.ok(res);
+    }
+    @PostMapping("/questions")
+    public ResponseEntity<?>getQuestions(@RequestBody TestActivityDTO testActivityDTO){
+        if(testActivityDTO.getType().equals("quiz")) {
+            List<Questions> questions = questionsRepo.findByQuizId(testActivityDTO.getId());
+            List<QuizQuestionsDTO> res = new ArrayList<>();
+            for (Questions question : questions) {
+                List<Options> options = optionsRepo.findByQuestionId(question.getId());
+                QuizQuestionsDTO quizQuestionsDTO = new QuizQuestionsDTO(question, options);
+                res.add(quizQuestionsDTO);
+            }
+            return ResponseEntity.ok(res);
+        }
+        List<Questions>questions=questionsRepo.findByTaskId(testActivityDTO.getId());
+        return ResponseEntity.ok(questions);
     }
 }

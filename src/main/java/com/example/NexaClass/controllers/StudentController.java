@@ -40,6 +40,8 @@ public class StudentController {
     QuestionsRepo questionsRepo;
     @Autowired
     OptionsRepo optionsRepo;
+    @Autowired
+    ActivityReportsRepo activityReportsRepo;
     @GetMapping("/classrooms")
     public ResponseEntity<?>getClassRooms(Authentication authentication){
         String username = authentication.getName();
@@ -141,5 +143,10 @@ public class StudentController {
         }
         List<Questions>questions=questionsRepo.findByTaskId(testActivityDTO.getId());
         return ResponseEntity.ok(questions);
+    }
+    @PostMapping("/submit")
+    public ResponseEntity<?>submitTest(@RequestBody ActivityReports activityReports){
+        activityReportsRepo.save(activityReports);
+        return ResponseEntity.ok("submitted successfully");
     }
 }

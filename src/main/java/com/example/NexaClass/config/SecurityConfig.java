@@ -2,6 +2,14 @@ package com.example.NexaClass.config;
 
 import com.example.NexaClass.filter.JwtAuthenticationFilter;
 import com.example.NexaClass.services.CustomUserDetailsService;
+import io.micrometer.observation.ObservationRegistry;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.function.DefaultFunctionCallbackResolver;
+import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.ollama.api.OllamaApi;
+import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.ai.ollama.management.ModelManagementOptions;
+import org.springframework.ai.ollama.management.PullModelStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +30,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.time.Duration;
 import java.util.*;
 
 @Configuration
@@ -38,6 +48,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/chatbot/**").permitAll()
                 .requestMatchers("/student/**").hasRole("STUDENT")
                 .requestMatchers("/faculty/**").hasRole("FACULTY")
                 .anyRequest().authenticated()
@@ -77,5 +88,27 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ChatClient chatClient() {
+        OllamaApi ollamaApi = new OllamaApi("http://localhost:11434");
+        OllamaOptions options = OllamaOptions.create().withModel("gemma3:1b");
+        DefaultFunctionCallbackResolver resolver = new DefaultFunctionCallbackResolver();
+        ModelManagementOptions managementOptions = new ModelManagementOptions(
+                PullModelStrategy.ALWAYS,
+                Collections.emptyList(),
+                Duration.ofMinutes(5),
+                1
+        );
+        OllamaChatModel model = new OllamaChatModel(
+                ollamaApi,
+                options,
+                resolver,
+                Collections.emptyList(),
+                ObservationRegistry.NOOP,
+                managementOptions
+        );
+        return ChatClient.builder(model).build();
     }
 }

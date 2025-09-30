@@ -1,18 +1,20 @@
 package com.example.NexaClass.controllers;
 
-import com.example.NexaClass.DTO.ActivityDTO;
-import com.example.NexaClass.DTO.QuizQuestionsDTO;
-import com.example.NexaClass.DTO.TestActivityDTO;
+import com.example.NexaClass.DTO.*;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
+import com.example.NexaClass.services.CodeExecutionService;
 import com.example.NexaClass.utilities.JwtUtil;
 import jakarta.transaction.Transactional;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,8 @@ public class StudentController {
     OptionsRepo optionsRepo;
     @Autowired
     ActivityReportsRepo activityReportsRepo;
+    @Autowired
+    private CodeExecutionService codeExecutionService;
     @GetMapping("/classrooms")
     public ResponseEntity<?>getClassRooms(Authentication authentication){
         String username = authentication.getName();
@@ -148,5 +152,14 @@ public class StudentController {
     public ResponseEntity<?>submitTest(@RequestBody ActivityReports activityReports){
         activityReportsRepo.save(activityReports);
         return ResponseEntity.ok("submitted successfully");
+    }
+    @PostMapping("/run")
+    public ResponseEntity<?> runCode(@RequestBody CodeRequest request) {
+        try {
+            String output = codeExecutionService.executeCode(request.getLanguage(), request.getCode());
+            return ResponseEntity.ok(new CodeResponse(false, output));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new CodeResponse(true, e.getMessage()));
+        }
     }
 }

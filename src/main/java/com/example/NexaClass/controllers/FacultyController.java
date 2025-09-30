@@ -169,13 +169,9 @@ public class FacultyController {
         }
         return ResponseEntity.ok(res);
     }
-    @GetMapping("/question/{id}")
+    @GetMapping("/quizquestion/{id}")
     public ResponseEntity<?>getQuestion(@PathVariable int id){
-        System.out.println(id);
         List<QuestionDTO>res=new ArrayList<>();
-        List<Questions>AllQ=questionsRepo.findByTaskId(id);
-        if(!AllQ.isEmpty())
-            return ResponseEntity.ok(AllQ);
         List<Questions>AllQuestions=questionsRepo.findByQuizId(id);
         for(Questions questions:AllQuestions){
             List<Options>options=optionsRepo.findByQuestionId(questions.getId());
@@ -183,24 +179,44 @@ public class FacultyController {
         }
         return ResponseEntity.ok(res);
     }
-    @DeleteMapping("/question/{id}")
+    @GetMapping("/taskquestion/{id}")
+    public ResponseEntity<?>getTaskQuestion(@PathVariable int id){
+        List<Questions>AllQuestions=questionsRepo.findByTaskId(id);
+        return ResponseEntity.ok(AllQuestions);
+    }
+    @DeleteMapping("/quizquestion/{id}")
     @Transactional
-    public ResponseEntity<?>deleteQuestion(@PathVariable int id){
-        int quizId=questionsRepo.findById(id).get().getQuizId();
-        int taskId=questionsRepo.findById(id).get().getTaskId();
+    public ResponseEntity<?> deleteQuestion(@PathVariable int id) {
+        System.out.println(id);
+        Optional<Questions> optionalQuestion = questionsRepo.findById(id);
+        if (optionalQuestion.isEmpty()) {
+            return ResponseEntity.status(404).body("Question not found with id " + id);
+        }
+        int quizId = optionalQuestion.get().getQuizId();
         questionsRepo.deleteById(id);
         optionsRepo.deleteByQuestionId(id);
-        if (quizId>=0){
-            List<QuestionDTO>res=new ArrayList<>();
-            List<Questions>AllQuestions=questionsRepo.findByQuizId(quizId);
-            for(Questions questions:AllQuestions){
-                List<Options>options=optionsRepo.findByQuestionId(questions.getId());
-                res.add(new QuestionDTO(questions.getId(),questions.getQuizId(), questions.getTaskId(), questions.getDescription(), questions.getAnswer(), options));
-            }
-            return ResponseEntity.ok(res);
+        List<QuestionDTO> res = new ArrayList<>();
+        List<Questions> allQuestions = questionsRepo.findByQuizId(quizId);
+        for (Questions questions : allQuestions) {
+            List<Options> options = optionsRepo.findByQuestionId(questions.getId());
+            res.add(new QuestionDTO(
+                    questions.getId(),
+                    questions.getQuizId(),
+                    questions.getTaskId(),
+                    questions.getDescription(),
+                    questions.getAnswer(),
+                    options
+            ));
         }
-        List<Questions>AllQuestions=questionsRepo.findByTaskId(taskId);
-        return ResponseEntity.ok(AllQuestions);
+        return ResponseEntity.ok(res);
+    }
+    @DeleteMapping("/taskquestion/{id}")
+    @Transactional
+    public ResponseEntity<?>deleteTaskQuestion(@PathVariable int id){
+        int taskId=questionsRepo.findById(id).get().getTaskId();
+        questionsRepo.deleteById(id);
+        List<Questions>questions=questionsRepo.findByTaskId(taskId);
+        return ResponseEntity.ok(questions);
     }
     @PutMapping("/quiz")
     public ResponseEntity<?>updateQuiz(@RequestBody Quiz quiz){

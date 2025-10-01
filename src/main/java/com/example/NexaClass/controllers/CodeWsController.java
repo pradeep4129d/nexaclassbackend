@@ -12,11 +12,14 @@ import org.springframework.stereotype.Controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class CodeWsController {
@@ -26,7 +29,8 @@ public class CodeWsController {
     public CodeWsController(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
-    HashMap<String,Process>processes=new HashMap<>();
+    private final Map<String, Process> processes = new ConcurrentHashMap<>();
+    private final Map<String, String> userProcesses = new ConcurrentHashMap<>();
     private String processTempDir() {
         return System.getProperty("java.io.tmpdir");
     }
@@ -55,7 +59,8 @@ public class CodeWsController {
             case "python":
                 return new String[]{"python", file.toString()};
             case "c":
-                Path cExe = file.getParent().resolve("program.exe");
+                String exeName = UUID.randomUUID() + "-program.exe";
+                Path cExe = file.getParent().resolve(exeName);
                 String compileC = "gcc \"" + file.toString() + "\" -o \"" + cExe.toString() + "\"";
                 String runC = "\"" + cExe.toString() + "\"";
                 return new String[]{"cmd.exe", "/c", compileC + " && " + runC};
@@ -71,11 +76,28 @@ public class CodeWsController {
                 throw new IllegalArgumentException("Unsupported language: " + language);
         }
     }
+    private void stopProcess(Process process) {
+        if (process != null) {
+            process.destroy();
+            try {
+                if (!process.waitFor(2, TimeUnit.SECONDS)) {
+                    process.destroyForcibly();
+                }
+            } catch (InterruptedException e) {
+                process.destroyForcibly();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
     @MessageMapping("/run")
     @SendTo("/topic/output")
-    public ResponseEntity<?> runCode(RunRequest request) {
-        if(!request.getOldProcessId().isEmpty()){
-            processes.remove(request.getOldProcessId());
+    public void runCode(RunRequest request) {
+        String studentId = request.getStudentId();
+        if (userProcesses.containsKey(studentId)) {
+            String oldProcessId = userProcesses.get(studentId);
+            Process oldProcess = processes.remove(oldProcessId);
+            stopProcess(oldProcess);
+            userProcesses.remove(studentId);
         }
         String processId = UUID.randomUUID().toString();
         try {
@@ -85,6 +107,7 @@ public class CodeWsController {
                     .redirectErrorStream(false)
                     .start();
             processes.put(processId,process);
+            userProcesses.put(studentId, processId);
             System.out.println(processes.size());
             messagingTemplate.convertAndSend("/topic/output/"+request.getStudentId(),Map.of("processId",processId));
             new Thread(() -> {
@@ -113,13 +136,23 @@ public class CodeWsController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return ResponseEntity.ok("successful");
     }
     @MessageMapping("/input")
-    @SendTo("/topic/output")
-    public String sendInput(InputRequest inputRequest) {
-        System.out.println("Received input:");
-        System.out.println(inputRequest.getInput());
-        return "Input received: " + inputRequest.getInput();
+    public void sendInput(InputRequest inputRequest) {
+        String processId = inputRequest.getProcessId();
+        String input = inputRequest.getInput();
+        Process process = processes.get(processId);
+        if (process == null) {
+            System.out.println("No process found with id: " + processId);
+            return;
+        }
+        try {
+            OutputStream stdin = process.getOutputStream();
+            stdin.write((input + "\n").getBytes());
+            stdin.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 }

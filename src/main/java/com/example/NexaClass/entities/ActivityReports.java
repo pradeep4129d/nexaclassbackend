@@ -14,7 +14,7 @@ public class ActivityReports {
     private int sessionId;
     @Column
     private String type;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private int activityId;
     @Column
     private boolean test;

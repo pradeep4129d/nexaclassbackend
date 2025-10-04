@@ -14,7 +14,7 @@ public class Questions {
     private int taskId;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String answer;
     public Questions(){}
     public Questions(int quizId, int taskId, String description, String answer) {

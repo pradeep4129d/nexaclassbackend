@@ -145,8 +145,19 @@ public class StudentController {
         return ResponseEntity.ok(questions);
     }
     @PostMapping("/submit")
-    public ResponseEntity<?>submitTest(@RequestBody ActivityReports activityReports){
-        activityReportsRepo.save(activityReports);
-        return ResponseEntity.ok("submitted successfully");
+    public ResponseEntity<?>submitTest(@RequestBody ActivityReports activityReport){
+        activityReportsRepo.save(activityReport);
+        List<ActivityReports>activityReports=activityReportsRepo.findByStudentId(activityReport.getStudentId());
+        return ResponseEntity.ok(activityReports);
+    }
+    @GetMapping("/attempted")
+    public  ResponseEntity<?>getAttemptedIds(Authentication authentication){
+        String username = authentication.getName();
+        Optional<Student>student=studentRepo.findByEmail(username);
+        if(student.isPresent()){
+            List<ActivityReports>activityReports=activityReportsRepo.findByStudentId(Integer.parseInt((Long.toString(student.get().getId()))));
+            return ResponseEntity.ok(activityReports);
+        }
+        return ResponseEntity.status(404).body("not found");
     }
 }

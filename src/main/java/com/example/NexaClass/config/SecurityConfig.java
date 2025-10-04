@@ -98,7 +98,7 @@ public class SecurityConfig {
     @Bean
     public ChatClient chatClient() {
         OllamaApi ollamaApi = new OllamaApi("http://localhost:11434");
-        OllamaOptions options = OllamaOptions.create().withModel("gemma3:1b");
+        OllamaOptions options = OllamaOptions.create().withModel("gemma3:4b");
         DefaultFunctionCallbackResolver resolver = new DefaultFunctionCallbackResolver();
         ModelManagementOptions managementOptions = new ModelManagementOptions(
                 PullModelStrategy.ALWAYS,

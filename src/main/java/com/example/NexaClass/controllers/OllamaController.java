@@ -42,17 +42,15 @@ public class OllamaController {
                     Follow these rules strictly:
                     1. If the student answer is exactly correct, give full marks.
                     2. If the student answer is partially correct, give marks proportional to correctness.
-                    3. If the student answer is completely wrong or irrelevant, give 0 marks.
+                    3. If the student answer is completely wrong or irrelevant or empty, give 0 marks.
                     4. Do not be lenient or generous for unrelated answers.
                     5. Ignore spelling, grammar, and formatting differences — focus only on correctness and completeness.
                     6. Always return a number, nothing else.
                     
-                    Question: %s
-                    Answer Key: %s
-                    Student Answer: %s
+                    Question: "%s"
+                    Answer Key: "%s"
+                    Student Answer: "%s"
                     Maximum Marks: %d
-                    
-                    Return only the marks scored.
                     """.formatted(q.question, q.key, q.studentAnswer, q.maxMarks);
             try {
                 String res = chatClient.prompt()
@@ -63,6 +61,7 @@ public class OllamaController {
                 int marks = 0;
                 try {
                     marks = Integer.parseInt(res);
+                    System.out.println(marks);
                 } catch (NumberFormatException e) {
                     marks = 0;
                 }

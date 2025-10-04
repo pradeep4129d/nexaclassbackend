@@ -1,9 +1,10 @@
 package com.example.NexaClass.controllers;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chatbot")
@@ -11,22 +12,65 @@ import org.springframework.web.bind.annotation.*;
 public class OllamaController {
 
     private final ChatClient chatClient;
-
-    public OllamaController(ChatClient chatClient){
+    public OllamaController(ChatClient chatClient) {
         this.chatClient = chatClient;
     }
-
-    public record ChatRequest(String prompt) {}
-    public record ChatResponse(String answer) {}
-
-    @PostMapping("/chat")
-    public ResponseEntity<?> chat(@RequestBody ChatRequest chatRequest){
-        System.out.println("Prompt: " + chatRequest.prompt());
-        String res = chatClient.prompt()
-                .user(chatRequest.prompt())
-                .call()
-                .content();
-        return ResponseEntity.ok(new ChatResponse(res));
+    public static class QuestionData {
+        public String question;
+        public String key;
+        public String studentAnswer;
+        public int maxMarks;
+    }
+    public static class EvaluateRequest {
+        public List<QuestionData> questions;
+    }
+    public static class EvaluateResponse {
+        public int totalMarks;
+        public EvaluateResponse(int totalMarks) {
+            this.totalMarks = totalMarks;
+        }
+    }
+    @PostMapping("/evaluate")
+    public ResponseEntity<EvaluateResponse> evaluate(@RequestBody EvaluateRequest request) {
+        int totalMarks = 0;
+        for (QuestionData q : request.questions) {
+            String prompt = """
+                    You are an unbiased and strict evaluator for computer science theory answers.
+                    Your task is to evaluate a student answer against the question and the answer key, and return only the marks scored as a number.
+                    Do NOT output any explanation, text, punctuation, or extra characters — just the number.
+                    
+                    Follow these rules strictly:
+                    1. If the student answer is exactly correct, give full marks.
+                    2. If the student answer is partially correct, give marks proportional to correctness.
+                    3. If the student answer is completely wrong or irrelevant, give 0 marks.
+                    4. Do not be lenient or generous for unrelated answers.
+                    5. Ignore spelling, grammar, and formatting differences — focus only on correctness and completeness.
+                    6. Always return a number, nothing else.
+                    
+                    Question: %s
+                    Answer Key: %s
+                    Student Answer: %s
+                    Maximum Marks: %d
+                    
+                    Return only the marks scored.
+                    """.formatted(q.question, q.key, q.studentAnswer, q.maxMarks);
+            try {
+                String res = chatClient.prompt()
+                        .user(prompt)
+                        .call()
+                        .content()
+                        .trim();
+                int marks = 0;
+                try {
+                    marks = Integer.parseInt(res);
+                } catch (NumberFormatException e) {
+                    marks = 0;
+                }
+                totalMarks += marks;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return ResponseEntity.ok(new EvaluateResponse(totalMarks));
     }
 }
-

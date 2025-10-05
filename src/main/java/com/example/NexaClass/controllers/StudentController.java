@@ -42,6 +42,8 @@ public class StudentController {
     OptionsRepo optionsRepo;
     @Autowired
     ActivityReportsRepo activityReportsRepo;
+    @Autowired
+    NotesRepo notesRepo;
     @GetMapping("/classrooms")
     public ResponseEntity<?>getClassRooms(Authentication authentication){
         String username = authentication.getName();
@@ -159,5 +161,14 @@ public class StudentController {
             return ResponseEntity.ok(activityReports);
         }
         return ResponseEntity.status(404).body("not found");
+    }
+    @GetMapping("/notes")
+    public ResponseEntity<?>getMyNotes(Authentication authentication){
+        String username = authentication.getName();
+        Optional<Student>student=studentRepo.findByEmail(username);
+        if(student.isPresent()){
+            return ResponseEntity.ok(notesRepo.findByStudentId(student.get().getId()));
+        }
+        return ResponseEntity.status(403).body("forbidden");
     }
 }

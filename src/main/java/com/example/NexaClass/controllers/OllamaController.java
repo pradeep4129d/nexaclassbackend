@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/chatbot")
@@ -71,5 +72,27 @@ public class OllamaController {
             }
         }
         return ResponseEntity.ok(new EvaluateResponse(totalMarks));
+    }
+    @PostMapping("/chat")
+    public Map<String, String> getChatResponse(@RequestBody Map<String, String> request) {
+        String question = request.get("query");
+        String systemPrompt = """
+                You are an academic assistant for college students.
+                Your purpose:
+                - Explain concepts clearly and briefly.
+                - Clarify doubts and guide debugging.
+                - You may give *short example code snippets (≤5 lines)* only when absolutely necessary.
+                - Never give full working code, full programs, or complete answers.
+                - Keep every response under 10 concise lines.
+                - Prefer bullet points or numbered steps.
+                - Encourage the student to reason and find the fix themselves.
+                - Maintain a friendly, supportive tone.
+                """;
+        String response = chatClient.prompt()
+                .system(systemPrompt)
+                .user(question)
+                .call()
+                .content();
+        return Map.of("response", response);
     }
 }

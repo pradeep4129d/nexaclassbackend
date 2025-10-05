@@ -12,7 +12,7 @@ public class Notes {
     private Long studentId;
     @Column(nullable = false)
     private String note;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String content;
     public Notes(){}
 

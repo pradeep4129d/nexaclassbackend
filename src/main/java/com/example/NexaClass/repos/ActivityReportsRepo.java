@@ -12,4 +12,5 @@ public interface ActivityReportsRepo extends JpaRepository<ActivityReports,Integ
     List<ActivityReports>findBySessionId(Integer id);
     List<ActivityReports>findByStudentId(Integer id);
     Optional<ActivityReports>findByActivityId(Integer id);
+    Optional<ActivityReports>findByActivityIdAndStudentId(Integer activityId,Integer studentId);
 }

@@ -1,5 +1,6 @@
 package com.example.NexaClass.controllers;
 
+import com.example.NexaClass.DTO.ActivityReportsDTO;
 import com.example.NexaClass.DTO.QuestionDTO;
 import com.example.NexaClass.entities.*;
 import com.example.NexaClass.repos.*;
@@ -38,6 +39,10 @@ public class FacultyController {
     TaskRepo taskRepo;
     @Autowired
     ActivityRepo activityRepo;
+    @Autowired
+    ActivityReportsRepo activityReportsRepo;
+    @Autowired
+    StudentRepo studentRepo;
     @GetMapping("/classroom")
     public ResponseEntity<?>getCR(Authentication authentication) {
         String username = authentication.getName();
@@ -293,6 +298,31 @@ public class FacultyController {
         int sessionId=activityRepo.findById(id).get().getSessionId();
         activityRepo.deleteById(id);
         return ResponseEntity.ok(activityRepo.findBySessionId(sessionId));
+    }
+    @GetMapping("/activityreports")
+    public ResponseEntity<?>getReports(Authentication authentication){
+        String username = authentication.getName();
+        Optional<Faculty> faculty =facultyRepo.findByEmail(username);
+        if(!faculty.isPresent()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("unAuthorized");
+        }
+        List<ActivityReports>activityReports=activityReportsRepo.findByFacultyId(Integer.parseInt((Long.toString(faculty.get().getId()))));
+        List<ActivityReportsDTO>res=new ArrayList<>();
+        for(ActivityReports activityReport:activityReports){
+            ActivityReportsDTO activityReportsDTO=new ActivityReportsDTO();
+            String studentUserName=studentRepo.findById(activityReport.getStudentId()).get().getUserName();
+            String sessionTitle=sessionRepo.findById(activityReport.getSessionId()).get().getTitle();
+            activityReportsDTO.setSessionTitle(sessionTitle);
+            activityReportsDTO.setStudentUserName(studentUserName);
+            activityReportsDTO.setType(activityReport.getType());
+            activityReportsDTO.setTest(activityReport.isTest());
+            activityReportsDTO.setPassed(activityReport.isPassed());
+            activityReportsDTO.setMarksScored(activityReport.getMarksScored());
+            activityReportsDTO.setTaskAnswers(activityReport.getTaskAnswer());
+            activityReportsDTO.setQuizAnswers(activityReport.getQuizAnswers());
+            res.add(activityReportsDTO);
+        }
+        return ResponseEntity.ok(res);
     }
 
 }

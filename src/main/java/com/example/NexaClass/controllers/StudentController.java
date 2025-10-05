@@ -148,6 +148,8 @@ public class StudentController {
     }
     @PostMapping("/submit")
     public ResponseEntity<?>submitTest(@RequestBody ActivityReports activityReport){
+        if(activityReportsRepo.findByActivityIdAndStudentId(activityReport.getActivityId(), activityReport.getStudentId()).isPresent())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already submitted");
         activityReportsRepo.save(activityReport);
         List<ActivityReports>activityReports=activityReportsRepo.findByStudentId(activityReport.getStudentId());
         return ResponseEntity.ok(activityReports);
@@ -170,5 +172,21 @@ public class StudentController {
             return ResponseEntity.ok(notesRepo.findByStudentId(student.get().getId()));
         }
         return ResponseEntity.status(403).body("forbidden");
+    }
+    @PostMapping("/notes")
+    public ResponseEntity<?>createNote(@RequestBody Notes note){
+        notesRepo.save(note);
+        return ResponseEntity.ok(notesRepo.findByStudentId(note.getStudentId()));
+    }
+    @DeleteMapping("/notes/{id}")
+    public ResponseEntity<?>deleteNote(@PathVariable int id){
+        Long stdId=notesRepo.findById(id).get().getStudentId();
+        notesRepo.deleteById(id);
+        return ResponseEntity.ok(notesRepo.findByStudentId(stdId));
+    }
+    @PutMapping("/notes")
+    public ResponseEntity<?>updateNote(@RequestBody Notes note){
+        notesRepo.save(note);
+        return ResponseEntity.ok("updated successfully");
     }
 }

@@ -74,7 +74,13 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        System.out.println(passwordEncoder.encode("faculy123"));
+        if(!facultyRepo.findById(1L).isPresent()){
+            Faculty faculty=new Faculty();
+            faculty.setEmail("faculty123@srivasavi.engg.ac.in");
+            faculty.setPassword(passwordEncoder.encode("faculy123"));
+            faculty.setUsername("faculty123");
+            facultyRepo.save(faculty);
+        }
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
@@ -84,7 +90,6 @@ public class AuthController {
     }
     @PostMapping("/register")
     public ResponseEntity<?>register(@RequestBody AuthRequest request){
-        verifiedMails.add("22a81a0504@sves.org.in");
         System.out.println(request.getUserName());
         if(facultyRepo.findByEmail(request.getEmail()).isPresent() || studentRepo .findByEmail(request.getEmail()).isPresent() || !verifiedMails.contains(request.getEmail())){
             return ResponseEntity.badRequest().body("email is not verified or already in use");

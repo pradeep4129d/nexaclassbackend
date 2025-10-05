@@ -13,6 +13,9 @@ public class Faculty {
     private String password;
     private String role="FACULTY";
 
+    public Faculty() {
+    }
+
     public String getRole() {
         return role;
     }

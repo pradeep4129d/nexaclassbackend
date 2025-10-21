@@ -9,19 +9,14 @@ import com.example.NexaClass.services.CustomUserDetailsService;
 import com.example.NexaClass.utilities.JwtUtil;
 import com.example.NexaClass.utilities.OTP;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 
@@ -43,6 +38,7 @@ public class AuthController {
     @Autowired
     StudentRepo studentRepo;
     private final HashMap<String,OTP>OTPs=new HashMap<>();
+    
     private final HashSet<String>verifiedMails=new HashSet<>();
     @PostMapping("/sendotp")
     public ResponseEntity<?>sendOtp(@RequestBody OtpRequest otpRequest){
@@ -67,6 +63,8 @@ public class AuthController {
             OTPs.remove(email);
             verifiedMails.add(email);
             return ResponseEntity.ok("OTP verified successfull");
+
+
         }else if(OTPs.containsKey(email) && Math.abs(Duration.between(LocalTime.now(),OTPs.get(email).getTime()).toMinutes())>2){
             OTPs.remove(email);
         }
@@ -93,8 +91,21 @@ public class AuthController {
         System.out.println(request.getUserName());
         if(facultyRepo.findByEmail(request.getEmail()).isPresent() || studentRepo .findByEmail(request.getEmail()).isPresent() || !verifiedMails.contains(request.getEmail())){
             return ResponseEntity.badRequest().body("email is not verified or already in use");
-        }
+       }
+
+
         if(request.getRole().equals("STUDENT")){
+            if (!studentRepo.findByEmail("student123@sves.org.in").isPresent()) {
+                Student student = new Student();
+                student.setUserName("student123");
+                student.setBranch("CSE"); // or any default branch
+                student.setEmail("student123@sves.org.in");
+                student.setPassword(passwordEncoder.encode("student123")); // strong password recommended
+                student.setSection("A"); // default section
+                student.setSemester("7");  // default semester
+                studentRepo.save(student);
+            }
+
             Student student=new Student();
             student.setUserName(request.getUserName());
             student.setBranch(request.getBranch());
